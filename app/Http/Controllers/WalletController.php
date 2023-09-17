@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Log;
 
-class FrontController extends Controller
+class WalletController extends Controller
 {
   public function index(Request $request)
   {
@@ -33,6 +33,7 @@ class FrontController extends Controller
       'cardfrom' => ['required', 'min:1', new WalletWithUser($walletFrom, $user)],
       'cardto' => ['required', 'min:1', new IssetWallet($walletTo)],
     ]);
+
     if ($validator->fails()) {
       return redirect()
         ->back()
@@ -40,21 +41,35 @@ class FrontController extends Controller
         ->withInput();
     }
 
+    $sum = $this->credit($request->sum, $walletFrom, $walletTo);
+
     $newMoney = $walletFrom->money - $request->sum;
     $walletFrom->update(['money' => $newMoney]);
-    $walletTo->update(['money' => $walletTo->money += $request->sum]);
-    Log::info("Перевод от счета $walletFrom->id на счет $walletTo->id на сумму $request->sum Дата:" . date("Ymd"), [$walletFrom, $walletTo]);
+    $walletTo->update(['money' => $walletTo->money += $sum]);
+    Log::info("Перевод от счета $walletFrom->id на счет $walletTo->id на сумму $sum $walletTo->currency Дата:" . date("Y-m-d"), [$walletFrom, $walletTo]);
 
     return redirect()
       ->back()
       ->with('success', 'карта пополнена успешно');
   }
 
-  public function Deposit()
-  {
+
+  public function createWallet(Request $request) {
+
+    $user = $request->user();
+    $wallet = Wallet::create([
+      'currency' => $request->currency,
+    ]);
+
+    $wallet->user()->associate($user->id)->save();
+    Log::info("Создан счет $wallet->id $wallet->currency пользователя $user->name Дата:" . date("Y-m-d"), [$wallet]);
+
+    return redirect()
+    ->back()
+    ->with('success', 'карта успешно создана');
   }
 
-  public function Withdraw()
-  {
+  public function credit($sum, $walletFrom, $walletTo) {
+    return $sum;
   }
 }

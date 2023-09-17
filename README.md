@@ -13,6 +13,9 @@ docker-compose up
 <li> Если post-install скрипты не выполнились, то:<ul>
 <li> создать .env файл копией от .env.example </li>
 <li> сгенерировать ключ: <code>php artisan key:generate</code></li>
+<li> выполнить все зависимости npm</li>
+<li> загрузить npm run build или dev</li>
+<li> выполнить все миграции и сидеры</li>
 </ul></li>
 <li> Указали доступ к базе в файле .env:
 <pre>
@@ -61,3 +64,10 @@ php composer.phar dump-autoload
 php artisan config:clear
 </code>  
 <p>Важно при создании новый файлов конфигов в папке config/</p>
+
+Есть два тестовых юзера 
+test@test.test
+test
+
+test2@test.test
+test
